@@ -55,8 +55,6 @@ export class PixiWheel {
         background.x = size.width / 2;
         background.y = size.height / 2;
 
-        this.update(.22);
-
         this.soundManager = new SoundManager();
         await this.soundManager.loadSounds();
 
@@ -67,12 +65,13 @@ export class PixiWheel {
         this.menuClass = new Menu(this.app.stage);
 
         this.gameText = new GameText(this.app);
-        this.gameText.mainClass = this;
         this.gameText.overlayGrahpics();
         this.gameText.addText(winAmount);
         this.gameText.addClickButton();
         this.coinShower = new CoinShower(this.app);
+        this.coinShower.callback = this.onCoinShowerFinish.bind(this);
 
+        this.update(.22);
     }
 
     async addSpinWheel() {
@@ -92,7 +91,7 @@ export class PixiWheel {
             const wheel = this.createSprite('wheel-center');
             wheel.tint = 0x00FF00;
             this.wheel_container.addChild(wheel);
-    
+
             let diff_angle = 45;
             for (let index = 0; index < 8; index++) {
                 const element = credits[index];
@@ -208,7 +207,10 @@ export class PixiWheel {
     }
 
     update(time) {
+        this.gameText.update(time);
+        this.coinShower.update(time);
         this.tweenArr.forEach(tween => tween.update(time));
+
         requestAnimationFrame(this.update.bind(this));
     }
 
@@ -267,6 +269,10 @@ export class PixiWheel {
 
             resolve();
         });
+    }
+
+    onCoinShowerFinish() {
+        this.gameText.show();
     }
 }
 

@@ -5,10 +5,11 @@ import { PixiWheel } from '.';
 // Reference to the water overlay.
 export default class GameText {
 
-    mainClass: PixiWheel
     container;
     app;
     isFadedOut = false;
+    tweenArr = [];
+    overlay;
 
     constructor(app) {
         this.app = app;
@@ -79,7 +80,7 @@ export default class GameText {
         const buttonContainer = new Container();
         buttonContainer.x = 150;
         buttonContainer.y = 200;
-     
+
         this.container.addChild(buttonContainer);
         // Create a button shape
         const buttonShape = new Graphics();
@@ -110,48 +111,76 @@ export default class GameText {
 
         // Add click event listener to the button container
         buttonContainer.on('click', () => {
-
-            if (this.isFadedOut)
-                return;
-
-            this.isFadedOut = true;
-            console.log(" guioytyogftf8try8uo");
-            let container = this.container;
-            let final = 1;
-            let stage = this.app.stage;
-            let mainClass = this.mainClass;
-
-            let tween = new TWEEN.Tween({ opcity: 1 })
-                .to({ opcity: 0 }, 1000)
-                .easing(TWEEN.Easing.Cubic.InOut)
-                .onUpdate(function onUpdate(obj) {
-                    /// alpha = 1 - 0.2 * 1;
-                    container.alpha = final - (final * obj)
-                    if (obj == 1) {
-                        this.isFadedOut = true;
-                        // stage.removeChild(this.container);
-                        let indx = mainClass.tweenArr.findIndex((value, ind) => {
-                            return value == tween;
-                        });
-                        mainClass.tweenArr.splice(indx, 1);
-                    }
-                })
-                .start();
-            mainClass.tweenArr.push(tween);
+            this.hide();
         });
     }
 
-    update() {
+    show() {
+        if (this.isFadedOut)
+            return;
 
+        console.log("show title scene");
+        this.overlay.interactive = true;
+        let self = this;
+        this.isFadedOut = true;
+        let container = this.container;
+        let final = 1;
+        let tween = new TWEEN.Tween({ opcity: 1 })
+            .to({ opcity: 0 }, 1000)
+            .easing(TWEEN.Easing.Cubic.InOut)
+            .onUpdate(function onUpdate(obj) {
+                container.alpha = final * obj;
+                if (obj == 1) {
+                    this.isFadedOut = true;
+                    self.tweenArr.pop();
+                }
+            })
+            .start();
+        self.tweenArr.push(tween);
+    }
+
+    hide() {
+        if (this.isFadedOut)
+            return;
+
+        console.log("hide title scene");
+        this.overlay.interactive = false;
+
+        this.isFadedOut = true;
+        let self = this;
+        let container = this.container;
+        let final = 1;
+
+        let tween = new TWEEN.Tween({ opcity: 1 })
+            .to({ opcity: 0 }, 1000)
+            .easing(TWEEN.Easing.Cubic.InOut)
+            .onUpdate(function onUpdate(obj) {
+                /// alpha = 1 - 0.2 * 1;
+                container.alpha = final - (final * obj)
+                if (obj == 1) {
+                    this.isFadedOut = true;
+                    self.tweenArr.pop();
+                }
+            })
+            .start();
+        self.tweenArr.push(tween);
+    }
+
+    update(delta: number) {
+        this.tweenArr.forEach(tween => tween.update(delta));
     }
 
     overlayGrahpics() {
-        const overlay = new Graphics();
-        overlay.beginFill(0x808080, 1);// End with fully transparent black
-        overlay.drawRect(0, 0, this.app.renderer.height, this.app.renderer.width);
-        overlay.endFill();
+        this.overlay = new Graphics();
+        this.overlay.interactive = true;
+        this.overlay.on('click', () => {
+            console.log('blank overlay');
+        });
+        this.overlay.beginFill(0x808080, 1);// End with fully transparent black
+        this.overlay.drawRect(0, 0, this.app.renderer.height, this.app.renderer.width);
+        this.overlay.endFill();
         // Add the overlay to the stage
-        this.container.addChild(overlay);
+        this.container.addChild(this.overlay);
 
     }
 }

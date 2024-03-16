@@ -2,9 +2,12 @@ import { Loader, AnimatedSprite, Assets, Sprite } from 'pixi.js';
 
 export default class CoinShower {
 
+    callback: Function;
     private coins: AnimatedSprite[] = [];
     private animationStopped: boolean = true;
     app;
+    gravity = 5;
+
     constructor(app) {
         this.app = app;
         this.onAssetsLoaded();
@@ -23,17 +26,16 @@ export default class CoinShower {
 
             const coin = new AnimatedSprite(texture);
             coin.anchor.set(0.5);
-            coin.x = Math.random() * this.app.screen.width;
-            coin.y = -50;
-            coin.scale.set(0.5);
-            coin.animationSpeed = 0.5; // Adjust animation speed as needed
+            coin.scale.set(0.4);
+            coin.animationSpeed = this.getMinMax(0.2, 0.8);
             coin.play();
             this.app.stage.addChild(coin);
             this.coins.push(coin);
         }
+        this.resetCoins();
         this.animationStopped = true;
-        this.app.ticker.add(this.update.bind(this));
     }
+
     async createSprite(url) {
         // const animations = Assets.cache.get(`assets/aminations/coin-anim/${url}`);
         const animations = Assets.cache.get(`coin-json`);
@@ -58,7 +60,7 @@ export default class CoinShower {
 
         this.coins.forEach((coin) => {
             if (!this.animationStopped) {
-                coin.y += 5 * delta; // Adjust the falling speed as needed
+                coin.y += this.gravity * delta; // Adjust the falling speed as needed
                 // Check if a coin has reached the bottom of the screen
                 if (coin.y < (this.app.screen.height + 100)) {
                     allCoinsAtBottom = false;
@@ -71,15 +73,18 @@ export default class CoinShower {
             this.animationStopped = true;
             // this.app.ticker.stop();
             console.log('Coin shower animation stopped.');
+            this.callback && this.callback();
         }
     }
 
     resetCoins() {
         this.coins.forEach((coin) => {
-            coin.y = -Math.random() * (700 - 100) + 100;
+            coin.y = -this.getMinMax(100, 700);
             coin.x = Math.random() * this.app.screen.width;
         });
     }
+
+    getMinMax(min, max) {
+        return Math.random() * (max - min) + min;
+    }
 }
-
-
