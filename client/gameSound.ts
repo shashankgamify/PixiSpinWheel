@@ -3,27 +3,38 @@ import { Howl } from 'howler';
 export default class SoundManager {
     private sounds: Howl[] = [];
 
-    constructor(private soundFiles: string[]) {
-        this.loadSounds();
-    }
+    soundFiles = [
+        'assets/sounds/credits-rollup.wav',
+        'assets/sounds/wheel-click.wav',
+        'assets/sounds/wheel-landing.wav',
+        // Add more sound file paths as needed
+    ];
 
-    private loadSounds(): void {
-        this.soundFiles.forEach((filePath) => {
-            const sound = new Howl({
-                src: [filePath],
-                volume: 1,
-                loop: false,
-                preload: true,
-                onload: () => {
-                    console.log(`Sound ${filePath} loaded`);
-                },
-                onloaderror: (error) => {
-                    console.error(`Error loading sound ${filePath}:`, error);
-                }
+    public async loadSounds() {
+
+        new Promise((resolve: Function) => {
+            let count = 0;
+            this.soundFiles.forEach((filePath) => {
+                const sound = new Howl({
+                    src: [filePath],
+                    volume: 1,
+                    loop: false,
+                    preload: true,
+                    onload: () => {
+                        ++count;
+                        if (count == this.soundFiles.length) {
+                            resolve();
+                        }
+                        console.log(`Sound ${filePath} loaded`);
+                    },
+                    onloaderror: (error) => {
+                        console.error(`Error loading sound ${filePath}:`, error);
+                    },
+                });
+
+                this.sounds.push(sound);
             });
-
-            this.sounds.push(sound);
-        });
+        })
     }
 
     playSound(index: number, loop: boolean = false): void {
