@@ -71,7 +71,7 @@ export class PixiWheel {
         this.coinShower = new CoinShower(this.app);
         this.coinShower.callback = this.onCoinShowerFinish.bind(this);
 
-        this.update(.22);
+        this.app.ticker.add(this.update.bind(this));
     }
 
     async addSpinWheel() {
@@ -209,9 +209,9 @@ export class PixiWheel {
     update(time) {
         this.gameText.update(time);
         this.coinShower.update(time);
-        this.tweenArr.forEach(tween => tween.update(time));
-
-        requestAnimationFrame(this.update.bind(this));
+        this.tweenArr.forEach((tween) => {
+            tween.update(TWEEN.now());
+        });
     }
 
     async addDropDown() {

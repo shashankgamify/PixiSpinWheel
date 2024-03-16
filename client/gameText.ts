@@ -8,7 +8,7 @@ export default class GameText {
     container;
     app;
     isFadedOut = false;
-    tweenArr = [];
+    tweenArr: TWEEN.Tween[] = [];
     overlay;
 
     constructor(app) {
@@ -116,13 +116,10 @@ export default class GameText {
     }
 
     show() {
-        if (this.isFadedOut)
-            return;
-
         console.log("show title scene");
         this.overlay.interactive = true;
         let self = this;
-        this.isFadedOut = true;
+        // this.isFadedOut = false;
         let container = this.container;
         let final = 1;
         let tween = new TWEEN.Tween({ opcity: 1 })
@@ -131,7 +128,7 @@ export default class GameText {
             .onUpdate(function onUpdate(obj) {
                 container.alpha = final * obj;
                 if (obj == 1) {
-                    this.isFadedOut = true;
+                    self.isFadedOut = false;
                     self.tweenArr.pop();
                 }
             })
@@ -154,11 +151,11 @@ export default class GameText {
         let tween = new TWEEN.Tween({ opcity: 1 })
             .to({ opcity: 0 }, 1000)
             .easing(TWEEN.Easing.Cubic.InOut)
-            .onUpdate(function onUpdate(obj) {
+            .onUpdate((obj) => {
                 /// alpha = 1 - 0.2 * 1;
                 container.alpha = final - (final * obj)
                 if (obj == 1) {
-                    this.isFadedOut = true;
+                    self.isFadedOut = true;
                     self.tweenArr.pop();
                 }
             })
@@ -167,7 +164,9 @@ export default class GameText {
     }
 
     update(delta: number) {
-        this.tweenArr.forEach(tween => tween.update(delta));
+        this.tweenArr.forEach((tween) => {
+            tween.update(TWEEN.now());
+        });
     }
 
     overlayGrahpics() {
