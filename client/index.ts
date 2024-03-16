@@ -92,7 +92,7 @@ export class PixiWheel {
             const wheel = this.createSprite('wheel-center');
             wheel.tint = 0x00FF00;
             this.wheel_container.addChild(wheel);
-            // this.wheel_container.visible = false;
+    
             let diff_angle = 45;
             for (let index = 0; index < 8; index++) {
                 const element = credits[index];
@@ -188,7 +188,7 @@ export class PixiWheel {
                     self.buttonText.text = "Select an item";
                     self.selectedItem = -1;
                     self.soundManager.playSound(2);
-                    this.coinShower.animateCoins();
+                    self.coinShower.animateCoins();
                 }
             })
             .start();

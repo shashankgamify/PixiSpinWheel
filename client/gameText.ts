@@ -43,30 +43,32 @@ export default class GameText {
         creditText.y = 420;
 
         this.app.stage.addChild(creditText);
+        const winText = new Text(winAmount, style);
 
-        const winAmountStyle = new TextStyle({
-            fontFamily: 'Arial',
-            dropShadow: true,
-            dropShadowAlpha: 0.8,
-            dropShadowAngle: 2.1,
-            dropShadowBlur: 4,
-            dropShadowColor: '0x111111',
-            dropShadowDistance: 10,
-            fill: ['#ffffff'],
-            stroke: '#004620',
-            fontSize: 60,
-            fontWeight: 'lighter',
-            lineJoin: 'round',
-            strokeThickness: 12,
-        });
-
-        const winText = new Text(winAmount, winAmountStyle);
-
-        winText.anchor.set(0.5, 0.5);
-        winText.x = 420;
-        winText.y = 450;
+        winText.x = 340;
+        winText.y = 420;
 
         this.app.stage.addChild(winText);
+
+        const textStyle = new TextStyle({
+            fontFamily: 'Arial',
+            fontSize: 64,
+            fontWeight: 'bold',
+            fill: ['#ffffff', '#ff3300'], // gradient colors
+            stroke: '#000000',
+            strokeThickness: 6,
+            dropShadow: true,
+            dropShadowColor: '#000000',
+            dropShadowBlur: 4,
+            dropShadowDistance: 6,
+            wordWrap: true,
+            wordWrapWidth: 600,
+            align: 'center'
+        });
+
+        // Create a PixiJS text object
+        const titleText = new Text('Spin Play Game', textStyle);
+        this.container.addChild(titleText)
     }
 
     addClickButton() {
@@ -75,11 +77,9 @@ export default class GameText {
 
         // Create a button container
         const buttonContainer = new Container();
-        // buttonContainer.x = 0;
-        // buttonContainer.y = 200;
-        buttonContainer.x = size.width / 2;
-        buttonContainer.y = size.height / 2 + 130;
-
+        buttonContainer.x = 150;
+        buttonContainer.y = 200;
+     
         this.container.addChild(buttonContainer);
         // Create a button shape
         const buttonShape = new Graphics();
@@ -115,9 +115,7 @@ export default class GameText {
                 return;
 
             this.isFadedOut = true;
-
             console.log(" guioytyogftf8try8uo");
-
             let container = this.container;
             let final = 1;
             let stage = this.app.stage;
