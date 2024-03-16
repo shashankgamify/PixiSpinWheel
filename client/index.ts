@@ -1,6 +1,4 @@
 // Create a Pixi.js application
-const credits = [5000, 200, 1000, 400, 2000, 200, 1000, 400];
-const wheelSpinWeight = [4, 100, 20, 50, 10, 100, 20, 50];
 
 import { Application, Assets, Container, Sprite, Text, Graphics, ICanvas } from 'pixi.js';
 import TWEEN from 'tween.js';
@@ -9,6 +7,8 @@ import SoundManager from './gameSound';
 import CoinShower from './coinShower';
 import Menu from './main';
 
+let credits;
+let wheelSpinWeight;
 
 let winAmount: number = 2000;
 export class PixiWheel {
@@ -35,7 +35,8 @@ export class PixiWheel {
             { alias: 'wheel-center', src: 'assets/images/wheel-center.png' },
             { alias: 'wheel-slice', src: 'assets/images/wheel-slice.png' },
             { alias: 'button', src: 'assets/images/button.png' },
-            { alias: 'coin-json', src: 'assets/aminations/coin-anim/coin-anim.json' }
+            { alias: 'coin-json', src: 'assets/aminations/coin-anim/coin-anim.json' },
+            { alias: 'config', src: 'assets/config.json' }
         ];
         await Assets.load(assets);
     }
@@ -54,6 +55,10 @@ export class PixiWheel {
         this.addChild(background);
         background.x = size.width / 2;
         background.y = size.height / 2;
+
+        let data = Assets.get('config');
+        credits = data.credits;
+        wheelSpinWeight = data.weight;
 
         this.soundManager = new SoundManager();
         await this.soundManager.loadSounds();
