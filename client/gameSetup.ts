@@ -1,24 +1,26 @@
 import { TextStyle, Text, Container, Graphics } from 'pixi.js';
 import TWEEN from 'tween.js';
-import { PixiWheel } from '.';
 
-// Reference to the water overlay.
-export default class GameText {
+export default class GameSetup {
 
+    winAmountContainer:Container;
     container;
     app;
     isFadedOut = false;
     tweenArr: TWEEN.Tween[] = [];
     overlay;
+    winText: Text;
+    
 
     constructor(app) {
         this.app = app;
-        this.container = new Container();
+        this.winAmountContainer = new Container();
+        this.container=new Container();  
         this.app.stage.addChild(this.container);
     }
 
     addText(winAmount: number) {
-
+        const size = { width: this.app.screen.width, height: this.app.screen.height };
         // Create a water texture object.
         const style = new TextStyle({
             fontFamily: 'Arial',
@@ -39,17 +41,16 @@ export default class GameText {
         });
 
         const creditText = new Text('Credit Balance :', style);
-
-        creditText.x = 50;
-        creditText.y = 420;
-
+        creditText.anchor.set(.5);
+        creditText.x = size.width/2-50;
+        creditText.y = size.height/1.35;
         this.app.stage.addChild(creditText);
-        const winText = new Text(winAmount, style);
 
-        winText.x = 340;
-        winText.y = 420;
-
-        this.app.stage.addChild(winText);
+        this.winText = new Text(winAmount, style);
+        this.winText.anchor.set(.5);
+        this.winText.x = size.width/1.5-80;
+        this.winText.y = size.height/1.35;
+        this.app.stage.addChild(this.winText);
 
         const textStyle = new TextStyle({
             fontFamily: 'Arial',
@@ -69,17 +70,74 @@ export default class GameText {
 
         // Create a PixiJS text object
         const titleText = new Text('Spin Play Game', textStyle);
+        titleText.anchor.set(.5);
+        titleText.x = size.width/2;
+        titleText.y = size.height/10;
         this.container.addChild(titleText)
     }
 
-    addClickButton() {
+    updateWinAmountText(winAmount) {
+        let targetNumber = parseInt(this.winText.text) + parseInt(winAmount);
+        const startNumber = parseInt(this.winText.text);
+        let self = this;
+        let winText = this.winText;
+        const tween = new TWEEN.Tween({ number: startNumber })
+            .to({ number: targetNumber }, 4000)
+            .easing(TWEEN.Easing.Cubic.InOut)
+            .onUpdate(function onUpdate(obj) {
+                winText.text = Math.round(this.number).toString();
+                if (obj == 1) {
+                    self.tweenArr.pop();
+                }
+            })
+            .start();
+        this.tweenArr.push(tween);
 
+
+    }
+
+    addWiningTextAmount(winAmount) {
         const size = { width: this.app.screen.width, height: this.app.screen.height };
+              
+        this.winAmountContainer.x = size.width/2-120;
+        this.winAmountContainer.y = size.height/2.8;
+        this.app.stage.addChild(this.winAmountContainer);
+        
+        const styleNorml = new TextStyle({
+            fontFamily: 'Arial',
+            fontSize: 20,
+            fontStyle: 'normal',
+            fontWeight: 'bold',
+            fill: ['#ff0051'], // gradient
+            wordWrap: true,
+            wordWrapWidth: 440,
+            lineJoin: 'round',
 
+        });
+        const backgroundRect = new Graphics();
+        backgroundRect.beginFill(0x000000, 0.9); // Background color and opacity
+        backgroundRect.drawRect(0, 0, 250, 25); // Rectangle dimensions
+        backgroundRect.endFill();
+        this.winAmountContainer.addChild(backgroundRect);
+
+        const winTextAmount = new Text('YOU WON ' + winAmount + ' CREDITS!', styleNorml);
+        winTextAmount.x=2.5;
+        winTextAmount.y=0;
+        this.winAmountContainer.addChild(winTextAmount);
+    }
+
+    removeWinningText() {
+        this.app.stage.removeChild(this.winAmountContainer);
+    }
+
+
+    addClickButton() {
+        const size = { width: this.app.screen.width, height: this.app.screen.height };
         // Create a button container
         const buttonContainer = new Container();
-        buttonContainer.x = 150;
-        buttonContainer.y = 200;
+        
+        buttonContainer.x = size.width/2-100;
+        buttonContainer.y = size.height/2.5;
 
         this.container.addChild(buttonContainer);
         // Create a button shape
@@ -87,10 +145,11 @@ export default class GameText {
         buttonShape.beginFill(0x66CCFF); // Fill color
         buttonShape.drawRoundedRect(0, 0, 200, 50, 15); // Draw a rectangle for the button
         buttonShape.endFill();
+
         buttonContainer.addChild(buttonShape);
 
         // Create text for the button
-        const buttonText = new Text('Click For Bouns Spin', { fontFamily: 'Arial', fontSize: 18, fill: 0xffffff });
+        const buttonText = new Text('PRESS TO SPIN', { fontFamily: 'Arial', fontSize: 18, fill: 0xffffff });
         buttonText.anchor.set(0.5); // Center the text
         buttonText.x = buttonShape.width / 2;
         buttonText.y = buttonShape.height / 2;
@@ -99,16 +158,6 @@ export default class GameText {
         // Enable interaction on the button container
         buttonContainer.interactive = true;
 
-        // Set button mode on mouseover
-        // buttonContainer.on('mouseover', () => {
-        //     buttonContainer.scale.set(1.1); // Scale up slightly
-        // });
-
-        // // Set default scale on mouseout
-        // buttonContainer.on('mouseout', () => {
-        //     buttonContainer.scale.set(1); // Restore original scale
-        // });
-
         // Add click event listener to the button container
         buttonContainer.on('click', () => {
             this.hide();
@@ -116,10 +165,8 @@ export default class GameText {
     }
 
     show() {
-        console.log("show title scene");
         this.overlay.interactive = true;
         let self = this;
-        // this.isFadedOut = false;
         let container = this.container;
         let final = 1;
         let tween = new TWEEN.Tween({ opcity: 1 })
@@ -139,10 +186,7 @@ export default class GameText {
     hide() {
         if (this.isFadedOut)
             return;
-
-        console.log("hide title scene");
         this.overlay.interactive = false;
-
         this.isFadedOut = true;
         let self = this;
         let container = this.container;
@@ -152,7 +196,6 @@ export default class GameText {
             .to({ opcity: 0 }, 1000)
             .easing(TWEEN.Easing.Cubic.InOut)
             .onUpdate((obj) => {
-                /// alpha = 1 - 0.2 * 1;
                 container.alpha = final - (final * obj)
                 if (obj == 1) {
                     self.isFadedOut = true;
@@ -162,6 +205,7 @@ export default class GameText {
             .start();
         self.tweenArr.push(tween);
     }
+
 
     update(delta: number) {
         this.tweenArr.forEach((tween) => {
@@ -176,15 +220,10 @@ export default class GameText {
             console.log('blank overlay');
         });
         this.overlay.beginFill(0x808080, 1);// End with fully transparent black
-        this.overlay.drawRect(0, 0, this.app.renderer.height, this.app.renderer.width);
+        this.overlay.drawRect(0, 0, window.outerWidth, window.outerHeight);
         this.overlay.endFill();
         // Add the overlay to the stage
         this.container.addChild(this.overlay);
 
     }
 }
-
-
-
-
-

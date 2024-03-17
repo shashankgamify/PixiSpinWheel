@@ -1,28 +1,26 @@
 // Create a Pixi.js application
 
-import { Application, Assets, Container, Sprite, Text, Graphics, ICanvas } from 'pixi.js';
+import { Application, Assets, Container, Sprite, Text, Graphics, TextStyle } from 'pixi.js';
 import TWEEN from 'tween.js';
-import GameText from './gameText';
+import GameSetup from './gameSetup';
 import SoundManager from './gameSound';
 import CoinShower from './coinShower';
-import Menu from './main';
 
 let credits;
 let wheelSpinWeight;
 
-let winAmount: number = 2000;
-export class PixiWheel {
 
+export class PixiWheel {
     tweenArr = [];
     isSpinPressed: Boolean = false;
-    menuClass: Menu;
-    gameText: GameText;
+    gameSetup: GameSetup;
     buttonText: Text;
     soundManager: SoundManager;
     coinShower: CoinShower;
     app;
     wheel_container: Container;
     selectedItem: number = -1;
+    totalWinAmount: number = 2000;
 
     constructor() {
         this.initCanvas();
@@ -45,10 +43,10 @@ export class PixiWheel {
 
         await this.preload();
 
-        this.app = new Application({ background: '#000000', width: 500, height: 500 });
+        this.app = new Application({ background: '#000000', width: window.outerWidth, height: window.outerHeight });
         globalThis.__PIXI_APP__ = this.app;
         document.body.appendChild(this.app.view);
-
+       
         const size = { width: this.app.screen.width, height: this.app.screen.height };
 
         const background = this.createSprite('background');
@@ -67,31 +65,30 @@ export class PixiWheel {
         await this.addSpinButton();
         await this.addDropDown();
 
-        this.menuClass = new Menu(this.app.stage);
-
-        this.gameText = new GameText(this.app);
-        this.gameText.overlayGrahpics();
-        this.gameText.addText(winAmount);
-        this.gameText.addClickButton();
+        this.gameSetup = new GameSetup(this.app);
+        this.gameSetup.overlayGrahpics();
+        this.gameSetup.addText(this.totalWinAmount);
+        this.gameSetup.addClickButton();
         this.coinShower = new CoinShower(this.app);
         this.coinShower.callback = this.onCoinShowerFinish.bind(this);
 
         this.app.ticker.add(this.update.bind(this));
     }
 
-    async addSpinWheel() {
+    
 
+    async addSpinWheel() {
         new Promise((resolve: Function) => {
             const size = { width: this.app.screen.width, height: this.app.screen.height };
             const pointer = this.createSprite('pointer');
             this.addChild(pointer);
             pointer.x = size.width / 2;
-            pointer.y = size.height / 2 - 190;
+            pointer.y = size.height / 2 - 238;
 
             this.wheel_container = new Container();
             this.addChild(this.wheel_container);
             this.wheel_container.x = size.width / 2;
-            this.wheel_container.y = size.height / 2 - 50;
+            this.wheel_container.y = size.height / 2 -90;
 
             const wheel = this.createSprite('wheel-center');
             wheel.tint = 0x00FF00;
@@ -130,7 +127,7 @@ export class PixiWheel {
             const size = { width: this.app.screen.width, height: this.app.screen.height };
             const btn_spin = this.createSprite('button')
             btn_spin.x = size.width / 2;
-            btn_spin.y = size.height / 2 + 130;
+            btn_spin.y = size.height / 2 + 95;
             btn_spin.scale.set(0.2);
             btn_spin.cursor = 'pointer';
             btn_spin.eventMode = 'static';
@@ -144,7 +141,7 @@ export class PixiWheel {
     onButtonCLick() {
         if (!this.isSpinPressed) {
             this.isSpinPressed = true;
-            this.soundManager.playSound(0);
+            this.soundManager.playSound(1);
             let indx = this.getRandWeight(wheelSpinWeight);
             if (this.selectedItem == -1) {
                 this.spinWheel(indx);
@@ -152,9 +149,9 @@ export class PixiWheel {
             else {
                 this.spinWheel(this.selectedItem)
             }
-
         }
     }
+
 
     getRandWeight(weights) {
         let totalWeight = 0, i, random;
@@ -186,21 +183,27 @@ export class PixiWheel {
             .easing(TWEEN.Easing.Cubic.InOut)
             .onUpdate(function onUpdate(obj) {
                 wheelc.angle = cur_angle + (final * obj);
+
                 if (obj == 1) {
-                    self.isSpinPressed = false;
                     self.tweenArr.pop();
                     self.buttonText.text = "Select an item";
                     self.selectedItem = -1;
                     self.soundManager.playSound(2);
+                    setTimeout(() => {
+                        self.soundManager.playSound(0, true);
+                    }, 500);
                     self.coinShower.animateCoins();
+                    self.gameSetup.addWiningTextAmount(credits[stopAtIndex]);
+                    self.gameSetup.updateWinAmountText(credits[stopAtIndex]);
+                    self.totalWinAmount += parseInt(credits[stopAtIndex]);
                 }
             })
             .start();
+
         this.tweenArr.push(tween);
     }
 
     createSprite(url) {
-        // const texture = await Assets.load(`assets/images/${url}`);
         const tex = Assets.get(url);
         const image = new Sprite(tex);
         image.anchor.set(0.5);
@@ -212,7 +215,7 @@ export class PixiWheel {
     }
 
     update(time) {
-        this.gameText.update(time);
+        this.gameSetup.update(time);
         this.coinShower.update(time);
         this.tweenArr.forEach((tween) => {
             tween.update(TWEEN.now());
@@ -222,9 +225,11 @@ export class PixiWheel {
     async addDropDown() {
         new Promise((resolve: Function) => {
             // Create a dropdown list container
+            const size = { width: this.app.screen.width, height: this.app.screen.height };
             const dropdownContainer = new Container();
-            dropdownContainer.x = 394;
-            dropdownContainer.y = 10;
+
+            dropdownContainer.x = size.width/1.2;
+            dropdownContainer.y = size.height/10;
             this.addChild(dropdownContainer);
 
             // Create the dropdown button
@@ -239,11 +244,8 @@ export class PixiWheel {
             dropdownItemsContainer.y = 40; // Adjust the position below the button
             dropdownContainer.addChild(dropdownItemsContainer);
 
-            // Define dropdown items
-            const dropdownItems = ['5000', '200', '1000', '400', '2000'];
-
             // Create dropdown items
-            dropdownItems.forEach((item, index) => {
+            Assets.get('config').dorpdownItem.forEach((item, index) => {
                 const dropdownItem = new Text(item, { fontFamily: 'Arial', fontSize: 16, fill: 0xffffff });
                 dropdownItem.interactive = true;
                 dropdownItem.cursor = 'pointer'; // Set cursor to 'pointer' to indicate interactivity
@@ -263,6 +265,29 @@ export class PixiWheel {
             this.buttonText.y = button.height / 2;
             button.addChild(this.buttonText);
 
+            const textStyle = new TextStyle({
+                fontFamily: 'Arial',
+                fontSize: 64,
+                fontWeight: 'bold',
+                fill: ['#ffffff', '#ff3300'], // gradient colors
+                stroke: '#000000',
+                strokeThickness: 6,
+                dropShadow: true,
+                dropShadowColor: '#000000',
+                dropShadowBlur: 4,
+                dropShadowDistance: 6,
+                wordWrap: true,
+                wordWrapWidth: 600,
+                align: 'center'
+            });
+
+            const bonusText = new Text('Bonus Spin',textStyle);
+            bonusText.anchor.set(0.5);
+            bonusText.x = size.width / 2;
+            bonusText.y = size.height / 10;
+            this.addChild(bonusText);
+            
+            
             // Hide dropdown items initially
             dropdownItemsContainer.visible = false;
 
@@ -270,6 +295,7 @@ export class PixiWheel {
             button.interactive = true;
             button.on('pointerdown', () => {
                 dropdownItemsContainer.visible = !dropdownItemsContainer.visible;
+              
             });
 
             resolve();
@@ -277,7 +303,10 @@ export class PixiWheel {
     }
 
     onCoinShowerFinish() {
-        this.gameText.show();
+        this.gameSetup.show();
+        this.soundManager.stopSound(0);
+        this.gameSetup.removeWinningText();
+        this.isSpinPressed = false;
     }
 }
 

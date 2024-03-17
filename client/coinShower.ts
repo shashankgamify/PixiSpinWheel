@@ -1,4 +1,4 @@
-import { Loader, AnimatedSprite, Assets, Sprite } from 'pixi.js';
+import { AnimatedSprite, Assets, Sprite } from 'pixi.js';
 
 export default class CoinShower {
 
@@ -16,7 +16,7 @@ export default class CoinShower {
     async onAssetsLoaded() {
         // Retrieve the coin texture atlas (sprite sheet) from the loader resources
         // Create coins and add them to the stage
-        const animations = await this.createSprite('coin_anim.json');
+        const animations = await this.createSprite();
         for (let i = 0; i < 50; i++) {
 
             let texture = [];
@@ -36,12 +36,8 @@ export default class CoinShower {
         this.animationStopped = true;
     }
 
-    async createSprite(url) {
-        // const animations = Assets.cache.get(`assets/aminations/coin-anim/${url}`);
+    async createSprite() {
         const animations = Assets.cache.get(`coin-json`);
-        // const character = PIXI.AnimatedSprite.fromFrames(animations["character/walk"]);
-        // const image = new Sprite(texture);
-        // image.anchor.set(0.5);
         return animations.data.animations;
     }
 
@@ -52,15 +48,13 @@ export default class CoinShower {
     }
 
     update(delta: number) {
-
         if (this.animationStopped)
             return;
 
         let allCoinsAtBottom = true;
-
         this.coins.forEach((coin) => {
             if (!this.animationStopped) {
-                coin.y += this.gravity * delta; // Adjust the falling speed as needed
+                coin.y += this.gravity * delta; 
                 // Check if a coin has reached the bottom of the screen
                 if (coin.y < (this.app.screen.height + 100)) {
                     allCoinsAtBottom = false;
@@ -71,9 +65,7 @@ export default class CoinShower {
         // Stop the animation if all coins are at the bottom
         if (allCoinsAtBottom) {
             this.animationStopped = true;
-            // this.app.ticker.stop();
-            console.log('Coin shower animation stopped.');
-            this.callback && this.callback();
+            this.callback && this.callback();            
         }
     }
 
