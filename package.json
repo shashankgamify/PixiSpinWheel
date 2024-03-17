@@ -5,8 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "build": "webpack --config webpack.config.js",
-    "optimize-assets": "imagemin client/assets/* --out-dir=dist/assets --plugin=pngquant"
+    "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",
