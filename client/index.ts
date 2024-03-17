@@ -43,7 +43,7 @@ export class PixiWheel {
 
         await this.preload();
 
-        this.app = new Application({ background: '#000000', width: window.outerWidth, height: window.outerHeight });
+        this.app = new Application({ background: '#000000', width: 1280, height: 720 });
         globalThis.__PIXI_APP__ = this.app;
         document.body.appendChild(this.app.view);
        

@@ -34,7 +34,8 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [
-                { from: './client/assets', to: 'assets' } // this line copies the assets folder to the dist folder
+                { from: './client/assets', to: 'assets' },
+                { from: './client/style.css', to: 'styles.css' } // this line copies the assets folder to the dist folder
             ]
         })
     ]

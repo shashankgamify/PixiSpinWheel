@@ -1,0 +1,15 @@
+h1 {
+    color: #36CFFF;
+}
+
+p {
+    font-size: 1.5em;
+    color: white;
+}
+
+div {
+    border: 5px inset gold;
+    background-color: black;
+    width: 300px;
+    text-align: center;
+}
